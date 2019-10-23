@@ -9,8 +9,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppNoTitle">
-        <activity android:name=".Profile"></activity>
-        <activity android:name=".FriendList" />
         <activity android:name=".MainActivity">
 
         </activity>
