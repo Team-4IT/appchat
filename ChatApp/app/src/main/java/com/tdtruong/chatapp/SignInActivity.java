@@ -3,6 +3,7 @@ package com.tdtruong.chatapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class SignInActivity extends AppCompatActivity {
     private TextView txtSignUp;
+    private Button mSignIn;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -18,6 +20,14 @@ public class SignInActivity extends AppCompatActivity {
 
         addControls();
         addEvents();
+
+        mSignIn = findViewById(R.id.signin_btn);
+        mSignIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
     }
 
     private void addEvents() {
