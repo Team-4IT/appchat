@@ -5,11 +5,11 @@ public class Contact {
 
     public String name, status, image;
 
-    public contact() {
+    public Contact() {
 
     }
 
-    public contact(String name, String status,String image){
+    public Contact(String name, String status, String image){
         this.name=name;
         this.status=status;
         this.image=image;

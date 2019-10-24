@@ -24,6 +24,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceIdReceiver;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -54,7 +55,7 @@ public class FriendList extends AppCompatActivity {
         currenUserID=mAuth.getCurrentUser().getUid();
 
         ContactRef =FirebaseDatabase.getInstance().getReference().child("Contact").child(currenUserID);
-        UserRef=FirebaseDatabase.getInstance().getReference().child("User")
+        UserRef=FirebaseDatabase.getInstance().getReference().child("User");
 
     }
 
@@ -114,7 +115,6 @@ public class FriendList extends AppCompatActivity {
 
     public static class contactViewHolder extends RecyclerView.ViewHolder{
 
-
         TextView userName, userStatus;
         CircleImageView  profileImage;
 
@@ -125,7 +125,6 @@ public class FriendList extends AppCompatActivity {
             userName=itemView.findViewById(R.id.user_profile_name);
             userStatus=itemView.findViewById(R.id.user_status);
             profileImage=itemView.findViewById(R.id.user_profile_image);
-
         }
     }
 }

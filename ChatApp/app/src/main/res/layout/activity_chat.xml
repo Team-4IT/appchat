@@ -32,6 +32,16 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/recycler_chat"
+        android:layout_below="@id/toolbar"
+        android:layout_above="@id/bottom_chat"
+        >
+
+    </androidx.recyclerview.widget.RecyclerView>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,11 +62,11 @@
             android:id="@+id/chat_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="0dp"
-            android:layout_marginRight="0dp"
             android:layout_toRightOf="@id/file_transfer_btn"
             android:layout_toLeftOf="@id/send_btn"
             android:hint="Type a message..."
+            android:layout_centerVertical="true"
+            android:background="@android:color/transparent"
             />
 
         <ImageButton
