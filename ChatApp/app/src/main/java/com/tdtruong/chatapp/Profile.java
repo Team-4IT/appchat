@@ -3,6 +3,8 @@ package com.tdtruong.chatapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.mbms.MbmsErrors;
 import android.text.TextUtils;
@@ -39,7 +41,6 @@ public class Profile extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-
         mAuth=FirebaseAuth.getInstance();
         currentUserID=mAuth.getCurrentUser().getUid();
         RootRef= FirebaseDatabase.getInstance().getReference();
@@ -55,12 +56,12 @@ public class Profile extends AppCompatActivity {
         });
     }
 
-    private void InitializeFields() {
-    UpdateAccountSetting = findViewById(R.id.update_setting_button);
-    userName = (EditText) findViewById(R.id.set_user_name);
-    userStatus = (EditText) findViewById(R.id.set_profile_status);
-    userProfileImage=(CircleImageView) findViewById(R.id.set_profile_image);
 
+    private void InitializeFields() {
+        UpdateAccountSetting = findViewById(R.id.update_setting_button);
+        userName = findViewById(R.id.set_user_name);
+        userStatus =  findViewById(R.id.set_profile_status);
+        userProfileImage=(CircleImageView) findViewById(R.id.set_profile_image);
     }
 
     private void UpdateSetting() {
@@ -83,6 +84,8 @@ public class Profile extends AppCompatActivity {
                  public void onComplete(@NonNull Task<Void> task) {
                      if (task.isSuccessful()) {
                          Toast.makeText(Profile.this, "Profile update successfuly...", Toast.LENGTH_SHORT).show();
+                         Intent iOpenChatScreen = new Intent(Profile.this, ChatActivity.class);
+                         startActivity(iOpenChatScreen);
                      } else {
                          String message = task.getException().toString();
                          Toast.makeText(Profile.this, "Error: " + message, Toast.LENGTH_SHORT).show();

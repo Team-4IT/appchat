@@ -18,7 +18,7 @@
         app:civ_border_color="@color/colorPrimary"
         app:civ_border_width="4dp" />
 
-    <TextView
+    <EditText
         android:layout_below="@id/set_profile_image"
         android:id="@+id/set_user_name"
         android:layout_width="match_parent"
@@ -35,7 +35,7 @@
         android:layout_marginTop="10dp"
         />
 
-    <TextView
+    <EditText
         android:layout_below="@id/set_user_name"
         android:id="@+id/set_profile_status"
         android:layout_width="match_parent"
