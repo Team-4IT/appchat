@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -88,14 +89,15 @@ public class MainActivity extends AppCompatActivity {
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+                ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());;;
                 int unread = 0;
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    Chat chat = snapshot.getValue(Chat.class);
-                    if (chat.getReceiver().equals(firebaseUser.getUid()) && !chat.isIsseen()){
-                        unread++;
-                    }
-                }
+//                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+//                    Chat chat = snapshot.getValue(Chat.class);
+//                    assert chat != null;
+//                    if (chat.getReceiver().equals(firebaseUser.getUid()) && !chat.isIsseen()){
+//                        unread++;
+//                    }
+//                }
 
                 if (unread == 0){
                     viewPagerAdapter.addFragment(new ChatsFragment(), "Chats");
@@ -134,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
             case  R.id.logout:
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(MainActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                finish();
                 return true;
         }
 

@@ -1,6 +1,8 @@
 package com.tdtruong.chatapp;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -17,6 +19,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -24,6 +29,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
+import com.google.firebase.storage.UploadTask;
 import com.tdtruong.chatapp.Adapter.MessageAdapter;
 import com.tdtruong.chatapp.Model.Chat;
 import com.tdtruong.chatapp.Model.User;
@@ -56,6 +66,10 @@ public class ChatActivity extends AppCompatActivity {
 
     private Intent mIntent;
 
+    private Uri fileUri;
+    private ProgressDialog loadingBar;
+    private String checker="", myUrl="";
+    private StorageTask uploadTask;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,6 +113,21 @@ public class ChatActivity extends AppCompatActivity {
 
         mFileButton = findViewById(R.id.file_transfer_btn);
         mFileButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_file_transfer));
+        mFileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                String mess = mChatEditText.getText().toString();
+//                if(!mess.equals(""))
+//                    sendMessage(mUser.getUid(), userid, mess);
+//                else
+//                    Toast.makeText(ChatActivity.this, "Your message is empty!",Toast.LENGTH_SHORT);
+//                mChatEditText.setText("");
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setType("pdf/*");
+                startActivityForResult(intent.createChooser(intent,"Send File"), 273);
+            }
+        });
 
 
         mEmotionButton = findViewById(R.id.emotion_btn);
@@ -184,5 +213,45 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 273 && resultCode == RESULT_OK && data.getData()!= null){
+//            loadingBar.setTitle("Sending File");
+//            loadingBar.setMessage("Please wait, we are sending that file...");
+//            loadingBar.setCanceledOnTouchOutside(false);
+//            loadingBar.show();
+
+            fileUri = data.getData();
+
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(("Files"));
+//            final String messageSenderRef = "Messages/" + mUser.getUid() + "/";
+//            final String messageReceiverRef = "Messages/";
+            final String messagePushID = mUser.getUid();
+            final StorageReference filePath = storageReference.child(messagePushID);
+            filePath.putFile(fileUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if(task.isSuccessful()){
+//                        loadingBar.dismiss();
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+//                    loadingBar.dismiss();
+                    Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                    double p =(100.0*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
+//                    loadingBar.setMessage((int)p + " % Uploading...");
+                }
+            });
+        }
     }
 }
