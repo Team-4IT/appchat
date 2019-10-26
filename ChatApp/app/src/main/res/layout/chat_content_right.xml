@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    >
+    android:padding="8dp">
+
     <RelativeLayout
         android:layout_width="300dp"
         android:layout_height="wrap_content"
@@ -11,8 +12,8 @@
         android:layout_alignParentRight="true">
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/profile_image"
             android:visibility="gone"
             />
@@ -25,15 +26,17 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:padding="5dp"
+            android:textSize="18sp"
+            android:text="Hello"
             android:textColor="#FFF"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/seen_message"
-            android:layout_below="@id/chat_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/seen_message"-->
+<!--            android:layout_below="@id/chat_content"-->
+<!--            android:layout_alignParentRight="true"-->
+<!--            android:layout_alignParentEnd="true" />-->
 
     </RelativeLayout>
 

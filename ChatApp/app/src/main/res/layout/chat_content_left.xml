@@ -18,14 +18,14 @@
         android:layout_toRightOf="@id/profile_image"
         android:layout_marginLeft="5dp"
         android:padding="8dp"
-        android:textColor="#FF"
+        android:textColor="#FFF"
         android:background="@drawable/background_left" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/seen_message"
-        android:visibility="gone"
-        android:layout_below="@id/chat_content"/>
+<!--    <TextView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/seen_message"-->
+<!--        android:visibility="gone"-->
+<!--        android:layout_below="@id/chat_content"/>-->
 
 </RelativeLayout>

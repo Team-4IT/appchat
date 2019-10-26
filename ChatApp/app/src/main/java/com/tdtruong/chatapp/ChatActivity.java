@@ -48,6 +48,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private FirebaseUser mUser;
     private DatabaseReference mReference;
+    private String userid;
 
     private List<Chat> mChatList;
     private RecyclerView mRecyclerView;
@@ -76,7 +77,9 @@ public class ChatActivity extends AppCompatActivity {
 
 
         mUser = FirebaseAuth.getInstance().getCurrentUser();
-        final String userid = mIntent.getStringExtra("userid");
+
+        mIntent = getIntent();
+//        userid = mIntent.getStringExtra("userid");
 
 
         mProfileImage = findViewById(R.id.profile_image);
@@ -107,9 +110,11 @@ public class ChatActivity extends AppCompatActivity {
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                TextView mchatcontent = findViewById(R.id.chat_content);
                 String mess = mChatEditText.getText().toString();
                 if(!mess.equals(""))
-                    sendMessage(mUser.getUid(), userid, mess);
+//                    sendMessage(mUser.getUid(), userid, mess);
+                    mchatcontent.setText(mess);
                 else
                     Toast.makeText(ChatActivity.this, "Your message is empty!",Toast.LENGTH_SHORT);
                 mChatEditText.setText("");
@@ -122,10 +127,12 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 mName.setText(user.getUsername());
-                if(user.getImageURL().equals("default"))
-                    mProfileImage.setImageDrawable(getResources().getDrawable(R.drawable.profile_image));
-                else
-                    Glide.with(getApplicationContext()).load(user.getImageURL()).into(mProfileImage);
+//                if(user.getImageURL().equals("default"))
+//                    mProfileImage.setImageDrawable(getResources().getDrawable(R.drawable.profile_image));
+//                else
+//                    Glide.with(getApplicationContext()).load(user.getImageURL()).into(mProfileImage);
+
+                mProfileImage.setImageDrawable(getResources().getDrawable(R.drawable.profile_image));
 
                 ReadMessage(mUser.getUid(), userid, user.getImageURL());
             }
@@ -161,9 +168,11 @@ public class ChatActivity extends AppCompatActivity {
                 mChatList.clear();
                 for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()){
                     Chat chat = dataSnapshot.getValue(Chat.class);
-                    if(chat.getReceiver().equals(myid) && chat.getSender().equals(userid) ||
-                            chat.getReceiver().equals(userid) && chat.getSender().equals(myid))
-                        mChatList.add(chat);
+//                    if(chat.getReceiver().equals(myid) && chat.getSender().equals(userid) ||
+//                            chat.getReceiver().equals(userid) && chat.getSender().equals(myid))
+//                        mChatList.add(chat);
+
+                    mChatList.add(chat);
 
                     mMessageAdapter = new MessageAdapter(ChatActivity.this, mChatList, imageurl);
                     mRecyclerView.setAdapter(mMessageAdapter);
