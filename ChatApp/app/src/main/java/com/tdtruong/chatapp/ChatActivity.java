@@ -86,7 +86,7 @@ public class ChatActivity extends AppCompatActivity {
         mProfileImage.setImageDrawable(getResources().getDrawable(R.drawable.profile_image));
 
 
-        mName = findViewById(R.id.name);
+        mName = findViewById(R.id.username);
         mChatEditText = findViewById(R.id.chat_edit_text);
 
 
