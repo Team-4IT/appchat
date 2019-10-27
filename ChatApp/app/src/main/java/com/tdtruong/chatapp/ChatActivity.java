@@ -46,6 +46,8 @@ public class ChatActivity extends AppCompatActivity {
     DatabaseReference reference;
 
     ImageButton btn_send;
+    ImageButton btn_file_transfer;
+    ImageButton btn_icon;
     EditText text_send;
 
     MessageAdapter messageAdapter;
@@ -82,7 +84,7 @@ public class ChatActivity extends AppCompatActivity {
 
 //        apiService = Client.getClient("https://fcm.googleapis.com/").create(APIService.class);
 
-        recyclerView = findViewById(R.id.recycler_view);
+        recyclerView = findViewById(R.id.recycler_chat);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setStackFromEnd(true);
@@ -90,7 +92,16 @@ public class ChatActivity extends AppCompatActivity {
 
         profile_image = findViewById(R.id.profile_image);
         username = findViewById(R.id.username);
+
         btn_send = findViewById(R.id.send_btn);
+        btn_send.setImageResource(R.drawable.ic_action_send);
+
+        btn_file_transfer = findViewById(R.id.file_transfer_btn);
+        btn_file_transfer.setImageResource(R.drawable.ic_action_file_transfer);
+
+        btn_icon = findViewById(R.id.emotion_btn);
+        btn_icon.setImageResource(R.drawable.ic_action_emotion);
+
         text_send = findViewById(R.id.chat_edit_text);
 
         intent = getIntent();
