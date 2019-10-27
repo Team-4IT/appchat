@@ -16,7 +16,6 @@
         <activity android:name=".FriendList"/>
         <activity android:name=".Profile"/>
         <activity android:name=".MainActivity"/>
-        <activity android:name=".ChatActivity"/>
 
         <activity android:name=".RegisterActivity">
             <meta-data
