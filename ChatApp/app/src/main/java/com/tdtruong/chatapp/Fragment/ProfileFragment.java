@@ -2,6 +2,7 @@ package com.tdtruong.chatapp.Fragment;
 
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,7 +10,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +36,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
+import com.tdtruong.chatapp.MainActivity;
 import com.tdtruong.chatapp.Model.User;
 import com.tdtruong.chatapp.R;
 
@@ -46,7 +51,8 @@ import static android.app.Activity.RESULT_OK;
 public class ProfileFragment extends Fragment {
 
     CircleImageView image_profile;
-    TextView username;
+    EditText name;
+    Button update_username;
 
     DatabaseReference reference;
     FirebaseUser fuser;
@@ -57,6 +63,7 @@ public class ProfileFragment extends Fragment {
     private StorageTask uploadTask;
 
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -64,7 +71,29 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         image_profile = view.findViewById(R.id.profile_image);
-        username = view.findViewById(R.id.username);
+
+        name = view.findViewById(R.id.username);
+        name.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                name.setCursorVisible(true);
+            }
+        });
+
+
+        update_username = view.findViewById(R.id.btn_update);
+        update_username.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                name.setCursorVisible(false);
+                MainActivity xxx = (MainActivity) getActivity();
+                xxx.username.setText(name.getText());
+                InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(name.getWindowToken(), 0);
+            }
+        });
+
 
         storageReference = FirebaseStorage.getInstance().getReference("uploads");
 
@@ -75,11 +104,11 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
-                username.setText(user.getUsername());
+                name.setText(user.getUsername());
                 if (user.getImageURL().equals("default")){
                     image_profile.setImageResource(R.drawable.profile_image);
                 } else {
-                    Glide.with(getContext()).load(user.getImageURL()).into(image_profile);
+                    Glide.with(getActivity()).load(user.getImageURL()).into(image_profile);
                 }
             }
 

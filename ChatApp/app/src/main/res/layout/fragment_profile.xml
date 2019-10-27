@@ -15,33 +15,37 @@
             android:padding="8dp"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Profile"
-                android:textColor="@color/colorPrimaryDark"
-                android:textStyle="bold"/>
-
             <de.hdodenhof.circleimageview.CircleImageView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:id="@+id/profile_image"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="10dp"
                 android:src="@drawable/profile_image"/>
 
-            <TextView
+            <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="username"
+                android:background="@android:color/transparent"
+                android:cursorVisible="false"
                 android:layout_below="@id/profile_image"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="10dp"
                 android:textColor="@color/colorPrimaryDark"
                 android:textStyle="bold"
                 android:id="@+id/username"
                 android:textSize="18sp"
-                android:layout_marginBottom="20dp"/>
+                android:layout_marginBottom="20dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_update"
+                android:text="UPDATE"
+                android:layout_below="@id/username"
+                android:layout_centerHorizontal="true"
+                android:background="@color/colorPrimaryDark"/>
 
         </RelativeLayout>
 

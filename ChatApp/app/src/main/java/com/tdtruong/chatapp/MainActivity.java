@@ -42,7 +42,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MainActivity extends AppCompatActivity {
 
     CircleImageView profile_image;
-    TextView username;
+    public TextView username;
 
     FirebaseUser firebaseUser;
     DatabaseReference reference;
