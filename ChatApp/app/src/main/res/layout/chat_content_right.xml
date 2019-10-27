@@ -30,13 +30,13 @@
             android:text="Hello"
             android:textColor="#FFF"/>
 
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:id="@+id/seen_message"-->
-<!--            android:layout_below="@id/chat_content"-->
-<!--            android:layout_alignParentRight="true"-->
-<!--            android:layout_alignParentEnd="true" />-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/seen_message"
+            android:layout_below="@id/chat_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
 
     </RelativeLayout>
 

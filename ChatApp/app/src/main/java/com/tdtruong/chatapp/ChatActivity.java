@@ -2,6 +2,7 @@ package com.tdtruong.chatapp;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -59,6 +60,7 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseUser mUser;
     private DatabaseReference mReference;
     private String userid;
+    private ValueEventListener seenListener;
 
     private List<Chat> mChatList;
     private RecyclerView mRecyclerView;
@@ -70,6 +72,7 @@ public class ChatActivity extends AppCompatActivity {
     private ProgressDialog loadingBar;
     private String checker="", myUrl="";
     private StorageTask uploadTask;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,7 +96,7 @@ public class ChatActivity extends AppCompatActivity {
         mUser = FirebaseAuth.getInstance().getCurrentUser();
 
         mIntent = getIntent();
-//        userid = mIntent.getStringExtra("userid");
+        userid = mIntent.getStringExtra("userid");
 
 
         mProfileImage = findViewById(R.id.profile_image);
@@ -116,12 +119,12 @@ public class ChatActivity extends AppCompatActivity {
         mFileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                String mess = mChatEditText.getText().toString();
-//                if(!mess.equals(""))
-//                    sendMessage(mUser.getUid(), userid, mess);
-//                else
-//                    Toast.makeText(ChatActivity.this, "Your message is empty!",Toast.LENGTH_SHORT);
-//                mChatEditText.setText("");
+                String mess = mChatEditText.getText().toString();
+                if(!mess.equals(""))
+                    sendMessage(mUser.getUid(), userid, mess);
+                else
+                    Toast.makeText(ChatActivity.this, "Your message is empty!",Toast.LENGTH_SHORT);
+                mChatEditText.setText("");
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 intent.setType("pdf/*");
@@ -141,9 +144,10 @@ public class ChatActivity extends AppCompatActivity {
             public void onClick(View view) {
                 TextView mchatcontent = findViewById(R.id.chat_content);
                 String mess = mChatEditText.getText().toString();
-                if(!mess.equals(""))
-//                    sendMessage(mUser.getUid(), userid, mess);
+                if(!mess.equals("")) {
+                    sendMessage(mUser.getUid(), userid, mess);
                     mchatcontent.setText(mess);
+                }
                 else
                     Toast.makeText(ChatActivity.this, "Your message is empty!",Toast.LENGTH_SHORT);
                 mChatEditText.setText("");
@@ -156,10 +160,10 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 mName.setText(user.getUsername());
-//                if(user.getImageURL().equals("default"))
-//                    mProfileImage.setImageDrawable(getResources().getDrawable(R.drawable.profile_image));
-//                else
-//                    Glide.with(getApplicationContext()).load(user.getImageURL()).into(mProfileImage);
+                if(user.getImageURL().equals("default"))
+                    mProfileImage.setImageDrawable(getResources().getDrawable(R.drawable.profile_image));
+                else
+                    Glide.with(getApplicationContext()).load(user.getImageURL()).into(mProfileImage);
 
                 mProfileImage.setImageDrawable(getResources().getDrawable(R.drawable.profile_image));
 
@@ -171,8 +175,7 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
-
-
+        seenMessage(userid);
     }
 
     private void sendMessage(String sender, String receiver, String message){
@@ -184,6 +187,29 @@ public class ChatActivity extends AppCompatActivity {
         hashMap.put("message", message);
 
         mReference.child("Chats").push().setValue(hashMap);
+
+        final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist")
+                .child(mUser.getUid())
+                .child(userid);
+
+        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()){
+                    chatRef.child("id").setValue(userid);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("Chatlist")
+                .child(userid)
+                .child(mUser.getUid());
+        chatRefReceiver.child("id").setValue(mUser.getUid());
     }
 
     private void ReadMessage (final String myid, final String userid, final String imageurl){
@@ -197,9 +223,9 @@ public class ChatActivity extends AppCompatActivity {
                 mChatList.clear();
                 for (DataSnapshot dataSnapshot1: dataSnapshot.getChildren()){
                     Chat chat = dataSnapshot.getValue(Chat.class);
-//                    if(chat.getReceiver().equals(myid) && chat.getSender().equals(userid) ||
-//                            chat.getReceiver().equals(userid) && chat.getSender().equals(myid))
-//                        mChatList.add(chat);
+                    if(chat.getReceiver().equals(myid) && chat.getSender().equals(userid) ||
+                            chat.getReceiver().equals(userid) && chat.getSender().equals(myid))
+                        mChatList.add(chat);
 
                     mChatList.add(chat);
 
@@ -215,33 +241,55 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    private void seenMessage(final String userid){
+        mReference = FirebaseDatabase.getInstance().getReference("Chats");
+        seenListener = mReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    Chat chat = snapshot.getValue(Chat.class);
+                    if (chat.getReceiver().equals(mUser.getUid()) && chat.getSender().equals(userid)){
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("isseen", true);
+                        snapshot.getRef().updateChildren(hashMap);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 273 && resultCode == RESULT_OK && data.getData()!= null){
-//            loadingBar.setTitle("Sending File");
-//            loadingBar.setMessage("Please wait, we are sending that file...");
-//            loadingBar.setCanceledOnTouchOutside(false);
-//            loadingBar.show();
+            loadingBar.setTitle("Sending File");
+            loadingBar.setMessage("Please wait, we are sending that file...");
+            loadingBar.setCanceledOnTouchOutside(false);
+            loadingBar.show();
 
             fileUri = data.getData();
 
             StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(("Files"));
-//            final String messageSenderRef = "Messages/" + mUser.getUid() + "/";
-//            final String messageReceiverRef = "Messages/";
+            final String messageSenderRef = "Messages/" + mUser.getUid() + "/";
+            final String messageReceiverRef = "Messages/";
             final String messagePushID = mUser.getUid();
             final StorageReference filePath = storageReference.child(messagePushID);
             filePath.putFile(fileUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     if(task.isSuccessful()){
-//                        loadingBar.dismiss();
+                        loadingBar.dismiss();
                     }
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-//                    loadingBar.dismiss();
+                    loadingBar.dismiss();
                     Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
 
                 }
@@ -249,9 +297,40 @@ public class ChatActivity extends AppCompatActivity {
                 @Override
                 public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
                     double p =(100.0*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
-//                    loadingBar.setMessage((int)p + " % Uploading...");
+                    loadingBar.setMessage((int)p + " % Uploading...");
                 }
             });
         }
     }
+
+    private void currentUser(String userid){
+        SharedPreferences.Editor editor = getSharedPreferences("PREFS", MODE_PRIVATE).edit();
+        editor.putString("currentuser", userid);
+        editor.apply();
+    }
+
+    private void status(String status){
+        mReference = FirebaseDatabase.getInstance().getReference("Users").child(mUser.getUid());
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("status", status);
+
+        mReference.updateChildren(hashMap);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        status("online");
+        currentUser(userid);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mReference.removeEventListener(seenListener);
+        status("offline");
+        currentUser("none");
+    }
+
 }
