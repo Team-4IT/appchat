@@ -5,8 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.format.Formatter;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -76,6 +78,9 @@ public class RegisterActivity extends AppCompatActivity {
                             assert firebaseUser != null;
                             String userid = firebaseUser.getUid();
 
+                            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                            String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+
                             reference = FirebaseDatabase.getInstance().getReference("Users").child(userid);
 
                             HashMap<String, String> hashMap = new HashMap<>();
@@ -84,6 +89,7 @@ public class RegisterActivity extends AppCompatActivity {
                             hashMap.put("imageURL", "default");
                             hashMap.put("status", "offline");
                             hashMap.put("search", username.toLowerCase());
+                            hashMap.put("ipaddress", ip);
 
                             reference.setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override

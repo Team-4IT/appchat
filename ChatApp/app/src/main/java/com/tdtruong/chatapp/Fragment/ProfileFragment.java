@@ -67,7 +67,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         image_profile = view.findViewById(R.id.profile_image);
@@ -86,8 +85,17 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 name.setCursorVisible(false);
+
                 MainActivity xxx = (MainActivity) getActivity();
                 xxx.username.setText(name.getText());
+
+                fuser = FirebaseAuth.getInstance().getCurrentUser();
+                reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("username", name.getText().toString());
+                hashMap.put("search", name.getText().toString().toLowerCase());
+                reference.updateChildren(hashMap);
+
                 InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
                         Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(name.getWindowToken(), 0);

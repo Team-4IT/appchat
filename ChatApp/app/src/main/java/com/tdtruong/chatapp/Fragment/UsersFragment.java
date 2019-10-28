@@ -37,7 +37,7 @@ public class UsersFragment extends Fragment {
     private UserAdapter userAdapter;
     private List<User> mUsers;
 
-    EditText search_users;
+    private EditText search_users;
 
 
     @Override
@@ -127,7 +127,7 @@ public class UsersFragment extends Fragment {
 
                     }
 
-                    userAdapter = new UserAdapter(getContext(), mUsers, false);
+                    userAdapter = new UserAdapter(getActivity(), mUsers, true);
                     recyclerView.setAdapter(userAdapter);
                 }
             }
