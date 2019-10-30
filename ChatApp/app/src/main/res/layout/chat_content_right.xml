@@ -27,8 +27,17 @@
             android:layout_alignParentEnd="true"
             android:padding="5dp"
             android:textSize="18sp"
-            android:text="Hello"
             android:textColor="#FFF"/>
+
+        <ImageView
+            android:src="@drawable/teddy"
+            android:layout_marginTop="10dp"
+            android:id="@+id/img_file"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            />
 
         <TextView
             android:layout_width="wrap_content"

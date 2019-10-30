@@ -1,6 +1,8 @@
 package com.tdtruong.chatapp.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,8 +54,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
 
     @Override
-    public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final MessageAdapter.ViewHolder holder, final int position) {
         Chat chat = mChat.get(position);
+        String messageSenderID = fuser.getUid();
+        String messageType = chat.getType();
         holder.chatContent.setText(chat.getMessage());
 
         if(imageUrl.equals("default"))
@@ -71,12 +75,32 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             }
         else
             holder.seenMessage.setVisibility(View.GONE);
+
+        if(messageType.equals("Text")){
+            holder.fileImage.setVisibility(View.GONE);
+            holder.chatContent.setVisibility(View.VISIBLE);
         }
+
+        if(messageType.equals("File")){
+            holder.fileImage.setVisibility(View.VISIBLE);
+            holder.chatContent.setVisibility(View.GONE);
+        }
+
+        holder.fileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mChat.get(position).getMessage()));
+                holder.fileImage.getContext().startActivity(intent);
+            }
+        });
+
+        }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         public TextView chatContent;
-        public ImageView profileImage;
+        public ImageView profileImage,fileImage;
         public TextView seenMessage;
 
 
@@ -85,6 +109,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             chatContent = view.findViewById(R.id.chat_content);
             profileImage = view.findViewById(R.id.profile_image);
             seenMessage = view.findViewById(R.id.seen_message);
+            fileImage = view.findViewById(R.id.img_file);
         }
     }
 

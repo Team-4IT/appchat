@@ -1,9 +1,13 @@
 package com.tdtruong.chatapp;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -11,12 +15,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +34,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
+import com.google.firebase.storage.UploadTask;
 import com.tdtruong.chatapp.Adapter.MessageAdapter;
 import com.tdtruong.chatapp.Model.Chat;
 import com.tdtruong.chatapp.Model.User;
@@ -48,6 +62,7 @@ public class ChatActivity extends AppCompatActivity {
     ImageButton btn_send;
     ImageButton btn_file_transfer;
     ImageButton btn_icon;
+    ImageButton fileImage;
     EditText text_send;
 
     MessageAdapter messageAdapter;
@@ -64,6 +79,11 @@ public class ChatActivity extends AppCompatActivity {
 //    APIService apiService;
 
     boolean notify = false;
+
+    private Uri fileUri;
+    private ProgressDialog loadingBar;
+    private String checker="", myUrl="";
+    private StorageTask uploadTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,9 +124,13 @@ public class ChatActivity extends AppCompatActivity {
 
         text_send = findViewById(R.id.chat_edit_text);
 
+        fileImage = findViewById(R.id.file);
+
         intent = getIntent();
         userid = intent.getStringExtra("userid");
         fuser = FirebaseAuth.getInstance().getCurrentUser();
+
+        loadingBar = new ProgressDialog(this);
 
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,13 +139,37 @@ public class ChatActivity extends AppCompatActivity {
                 String msg = text_send.getText().toString();
                 if (!msg.equals("")){
                     sendMessage(fuser.getUid(), userid, msg);
-                } else {
+                }
+
+                if(fileImage.isShown()){
+                    Log.e("Run","ok2");
+                    sendMessageHasFile();
+                    fileImage.setVisibility(View.GONE);
+                }
+
+                else {
                     Toast.makeText(ChatActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
                 }
+
                 text_send.setText("");
             }
         });
 
+        btn_file_transfer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String mess = text_send.getText().toString();
+                if(!mess.equals(""))
+                    sendMessage(fuser.getUid(), userid, mess);
+                else
+                    Toast.makeText(ChatActivity.this, "Your message is empty!",Toast.LENGTH_SHORT);
+                text_send.setText("");
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setType("pdf/*");
+                startActivityForResult(intent.createChooser(intent,"Send File"), 273);
+            }
+        });
 
         reference = FirebaseDatabase.getInstance().getReference("Users").child(userid);
 
@@ -179,13 +227,14 @@ public class ChatActivity extends AppCompatActivity {
         hashMap.put("sender", sender);
         hashMap.put("receiver", receiver);
         hashMap.put("message", message);
+        hashMap.put("type","Text");
         hashMap.put("isseen", false);
 
-        reference.child("Chats").push().setValue(hashMap);
+        reference.child("Chat1").push().setValue(hashMap);
 
 
         // add user to chat fragment
-        final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist")
+        final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist1")
                 .child(fuser.getUid())
                 .child(userid);
 
@@ -203,7 +252,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("Chatlist")
+        final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("Chatlist1")
                 .child(userid)
                 .child(fuser.getUid());
         chatRefReceiver.child("id").setValue(fuser.getUid());
@@ -226,6 +275,45 @@ public class ChatActivity extends AppCompatActivity {
 //
 //            }
 //        });
+    }
+
+    private void sendMessageHasFile(){
+
+//        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+//
+//        HashMap<String, Object> hashMap = new HashMap<>();
+//        hashMap.put("sender", sender);
+//        hashMap.put("receiver", receiver);
+//        hashMap.put("message", "");
+//        hashMap.put("type","File");
+//        hashMap.put("isseen", false);
+//
+//        reference.child("Chat1").push().setValue(hashMap);
+
+
+        // add user to chat fragment
+        final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist1")
+                .child(fuser.getUid())
+                .child(userid);
+
+        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()){
+                    chatRef.child("id").setValue(userid);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("Chatlist1")
+                .child(userid)
+                .child(fuser.getUid());
+        chatRefReceiver.child("id").setValue(fuser.getUid());
     }
 
 //    private void sendNotifiaction(String receiver, final String username, final String message){
@@ -270,7 +358,34 @@ public class ChatActivity extends AppCompatActivity {
     private void readMesagges(final String myid, final String userid, final String imageurl){
         mchat = new ArrayList<>();
 
-        reference = FirebaseDatabase.getInstance().getReference("Chats");
+        reference = FirebaseDatabase.getInstance().getReference("Chat1");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mchat.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    Chat chat = snapshot.getValue(Chat.class);
+                    if (chat.getReceiver().equals(myid) && chat.getSender().equals(userid) ||
+                            chat.getReceiver().equals(userid) && chat.getSender().equals(myid)){
+                        mchat.add(chat);
+                    }
+
+                    messageAdapter = new MessageAdapter(ChatActivity.this, mchat, imageurl);
+                    recyclerView.setAdapter(messageAdapter);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void readMesagges(final String myid, final String userid, final String imageurl, final int imgFile){
+        mchat = new ArrayList<>();
+
+        reference = FirebaseDatabase.getInstance().getReference("Chat1");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -322,5 +437,79 @@ public class ChatActivity extends AppCompatActivity {
         reference.removeEventListener(seenListener);
         status("offline");
         currentUser("none");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 273 && resultCode == RESULT_OK && data.getData()!= null){
+            loadingBar.setTitle("Sending File");
+            loadingBar.setMessage("Please wait, we are sending that file...");
+            loadingBar.setCanceledOnTouchOutside(false);
+            loadingBar.show();
+            fileImage.setVisibility(View.VISIBLE);
+
+            fileUri = data.getData();
+
+
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(("Files"));
+//            final String messageSenderRef = "Messages/" + fuser.getUid() + "/";
+//            final String messageReceiverRef = "Messages/";
+            final String messagePushID = fuser.getUid();
+            final StorageReference filePath = storageReference.child(messagePushID+"."+data.getType());
+
+
+
+            filePath.putFile(fileUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if(task.isSuccessful()){
+
+                        Task<Uri> result = task.getResult().getMetadata().getReference().getDownloadUrl();
+                        result.addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String fileLink = uri.toString();
+                                DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+
+                                HashMap<String, Object> hashMap = new HashMap<>();
+                                hashMap.put("sender", fuser.getUid());
+                                hashMap.put("receiver", userid);
+                                hashMap.put("message", fileLink);
+                                hashMap.put("type","File");
+                                hashMap.put("isseen", false);
+                                reference.child("Chat1").push().setValue(hashMap);
+                                loadingBar.dismiss();
+
+                            }
+                        });
+
+//                        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+//
+//                        HashMap<String, Object> hashMap = new HashMap<>();
+//                        hashMap.put("sender", fuser.getUid());
+//                        hashMap.put("receiver", userid);
+//                        hashMap.put("message", task.getResult().getMetadata().getReference().getDownloadUrl().getResult());
+//                        hashMap.put("type","File");
+//                        hashMap.put("isseen", false);
+//                        reference.child("Chat1").push().setValue(hashMap);
+//                        loadingBar.dismiss();
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    loadingBar.dismiss();
+                    Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                    double p =(100.0*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
+                    loadingBar.setMessage((int)p + " % Uploading...");
+                }
+            });
+        }
     }
 }

@@ -21,6 +21,15 @@
         android:padding="8dp"
         android:background="@drawable/background_left"/>
 
+    <ImageView
+        android:src="@drawable/teddy"
+        android:layout_marginTop="10dp"
+        android:id="@+id/img_file"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_toRightOf="@id/profile_image"
+        />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
