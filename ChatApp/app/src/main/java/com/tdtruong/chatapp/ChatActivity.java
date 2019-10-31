@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -75,15 +74,10 @@ public class ChatActivity extends AppCompatActivity {
     ValueEventListener seenListener;
 
     String userid;
-
-//    APIService apiService;
-
-    boolean notify = false;
+    String userIpAddress;
 
     private Uri fileUri;
     private ProgressDialog loadingBar;
-    private String checker="", myUrl="";
-    private StorageTask uploadTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,12 +91,10 @@ public class ChatActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // and this
                 startActivity(new Intent(ChatActivity.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
             }
         });
 
-//        apiService = Client.getClient("https://fcm.googleapis.com/").create(APIService.class);
 
         recyclerView = findViewById(R.id.recycler_chat);
         recyclerView.setHasFixedSize(true);
@@ -128,6 +120,7 @@ public class ChatActivity extends AppCompatActivity {
 
         intent = getIntent();
         userid = intent.getStringExtra("userid");
+        userIpAddress = intent.getStringExtra("useripaddr");
         fuser = FirebaseAuth.getInstance().getCurrentUser();
 
         loadingBar = new ProgressDialog(this);
@@ -135,18 +128,27 @@ public class ChatActivity extends AppCompatActivity {
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                notify = true;
-                String msg = text_send.getText().toString();
+                final String msg = text_send.getText().toString();
                 if (!msg.equals("")){
-                    sendMessage(fuser.getUid(), userid, msg);
+                    reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
+                    reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            User user = dataSnapshot.getValue(User.class);
+                            sendMessage(user.getIpaddress(), userIpAddress, msg);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }});
                 }
 
-                if(fileImage.isShown()){
+                else if(fileImage.isShown()){
                     Log.e("Run","ok2");
                     sendMessageHasFile();
                     fileImage.setVisibility(View.GONE);
                 }
-
                 else {
                     Toast.makeText(ChatActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
                 }
@@ -181,7 +183,6 @@ public class ChatActivity extends AppCompatActivity {
                 if (user.getImageURL().equals("default")){
                     profile_image.setImageResource(R.drawable.profile_image);
                 } else {
-                    //and this
                     Glide.with(getApplicationContext()).load(user.getImageURL()).into(profile_image);
                 }
 
@@ -204,7 +205,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     Chat chat = snapshot.getValue(Chat.class);
-                    if (chat.getReceiver().equals(fuser.getUid()) && chat.getSender().equals(userid)){
+                    if (chat.getUid_receiver().equals(fuser.getUid()) && chat.getUid_sender().equals(userid)){
                         HashMap<String, Object> hashMap = new HashMap<>();
                         hashMap.put("isseen", true);
                         snapshot.getRef().updateChildren(hashMap);
@@ -219,21 +220,22 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void sendMessage(String sender, final String receiver, String message){
+    private void sendMessage(String ipaddr_sender, final String ipaddr_receiver, String message){
 
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
 
+
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("sender", sender);
-        hashMap.put("receiver", receiver);
+        hashMap.put("ipaddr_sender", ipaddr_sender);
+        hashMap.put("ipaddr_receiver", ipaddr_receiver);
+        hashMap.put("uid_sender", fuser.getUid());
+        hashMap.put("uid_receiver", userid);
         hashMap.put("message", message);
         hashMap.put("type","Text");
         hashMap.put("isseen", false);
 
         reference.child("Chat1").push().setValue(hashMap);
 
-
-        // add user to chat fragment
         final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist1")
                 .child(fuser.getUid())
                 .child(userid);
@@ -257,41 +259,10 @@ public class ChatActivity extends AppCompatActivity {
                 .child(fuser.getUid());
         chatRefReceiver.child("id").setValue(fuser.getUid());
 
-//        final String msg = message;
-//
-//        reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
-//        reference.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                User user = dataSnapshot.getValue(User.class);
-//                if (notify) {
-//                    sendNotifiaction(receiver, user.getUsername(), msg);
-//                }
-//                notify = false;
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
     }
 
     private void sendMessageHasFile(){
 
-//        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-//
-//        HashMap<String, Object> hashMap = new HashMap<>();
-//        hashMap.put("sender", sender);
-//        hashMap.put("receiver", receiver);
-//        hashMap.put("message", "");
-//        hashMap.put("type","File");
-//        hashMap.put("isseen", false);
-//
-//        reference.child("Chat1").push().setValue(hashMap);
-
-
-        // add user to chat fragment
         final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist1")
                 .child(fuser.getUid())
                 .child(userid);
@@ -316,44 +287,6 @@ public class ChatActivity extends AppCompatActivity {
         chatRefReceiver.child("id").setValue(fuser.getUid());
     }
 
-//    private void sendNotifiaction(String receiver, final String username, final String message){
-//        DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("Tokens");
-//        Query query = tokens.orderByKey().equalTo(receiver);
-//        query.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-//                    Token token = snapshot.getValue(Token.class);
-//                    Data data = new Data(fuser.getUid(), R.mipmap.ic_launcher, username+": "+message, "New Message",
-//                            userid);
-//
-//                    Sender sender = new Sender(data, token.getToken());
-//
-//                    apiService.sendNotification(sender)
-//                            .enqueue(new Callback<MyResponse>() {
-//                                @Override
-//                                public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
-//                                    if (response.code() == 200){
-//                                        if (response.body().success != 1){
-//                                            Toast.makeText(com.koddev.chatapp.ChatActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
-//                                        }
-//                                    }
-//                                }
-//
-//                                @Override
-//                                public void onFailure(Call<MyResponse> call, Throwable t) {
-//
-//                                }
-//                            });
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
-//    }
 
     private void readMesagges(final String myid, final String userid, final String imageurl){
         mchat = new ArrayList<>();
@@ -365,8 +298,8 @@ public class ChatActivity extends AppCompatActivity {
                 mchat.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     Chat chat = snapshot.getValue(Chat.class);
-                    if (chat.getReceiver().equals(myid) && chat.getSender().equals(userid) ||
-                            chat.getReceiver().equals(userid) && chat.getSender().equals(myid)){
+                    if (chat.getUid_receiver().equals(myid) && chat.getUid_sender().equals(userid) ||
+                            chat.getUid_receiver().equals(userid) && chat.getUid_sender().equals(myid)){
                         mchat.add(chat);
                     }
 
@@ -382,32 +315,6 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void readMesagges(final String myid, final String userid, final String imageurl, final int imgFile){
-        mchat = new ArrayList<>();
-
-        reference = FirebaseDatabase.getInstance().getReference("Chat1");
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                mchat.clear();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    Chat chat = snapshot.getValue(Chat.class);
-                    if (chat.getReceiver().equals(myid) && chat.getSender().equals(userid) ||
-                            chat.getReceiver().equals(userid) && chat.getSender().equals(myid)){
-                        mchat.add(chat);
-                    }
-
-                    messageAdapter = new MessageAdapter(ChatActivity.this, mchat, imageurl);
-                    recyclerView.setAdapter(messageAdapter);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
 
     private void currentUser(String userid){
         SharedPreferences.Editor editor = getSharedPreferences("PREFS", MODE_PRIVATE).edit();
@@ -453,12 +360,8 @@ public class ChatActivity extends AppCompatActivity {
 
 
             StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(("Files"));
-//            final String messageSenderRef = "Messages/" + fuser.getUid() + "/";
-//            final String messageReceiverRef = "Messages/";
             final String messagePushID = fuser.getUid();
             final StorageReference filePath = storageReference.child(messagePushID+"."+data.getType());
-
-
 
             filePath.putFile(fileUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -483,17 +386,6 @@ public class ChatActivity extends AppCompatActivity {
 
                             }
                         });
-
-//                        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-//
-//                        HashMap<String, Object> hashMap = new HashMap<>();
-//                        hashMap.put("sender", fuser.getUid());
-//                        hashMap.put("receiver", userid);
-//                        hashMap.put("message", task.getResult().getMetadata().getReference().getDownloadUrl().getResult());
-//                        hashMap.put("type","File");
-//                        hashMap.put("isseen", false);
-//                        reference.child("Chat1").push().setValue(hashMap);
-//                        loadingBar.dismiss();
                     }
                 }
             }).addOnFailureListener(new OnFailureListener() {

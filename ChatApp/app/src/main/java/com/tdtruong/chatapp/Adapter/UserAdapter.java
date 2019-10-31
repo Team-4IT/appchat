@@ -83,7 +83,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, ChatActivity.class);
+                intent.putExtra("useripaddr", user.getIpaddress());
                 intent.putExtra("userid", user.getId());
+                intent.putExtra("userimageurl", user.getImageURL());
                 mContext.startActivity(intent);
             }
         });
@@ -113,11 +115,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }
     }
 
-    //check for last message
     private void lastMessage(final String userid, final TextView last_msg){
         theLastMessage = "default";
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chat1");
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -125,8 +126,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     Chat chat = snapshot.getValue(Chat.class);
                     if (firebaseUser != null && chat != null) {
-                        if (chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid) ||
-                                chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid())) {
+                        if (chat.getUid_receiver().equals(firebaseUser.getUid()) && chat.getUid_sender().equals(userid) ||
+                                chat.getUid_receiver().equals(userid) && chat.getUid_sender().equals(firebaseUser.getUid())) {
                             theLastMessage = chat.getMessage();
                         }
                     }

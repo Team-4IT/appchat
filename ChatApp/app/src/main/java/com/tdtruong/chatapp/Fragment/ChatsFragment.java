@@ -18,20 +18,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.tdtruong.chatapp.Adapter.UserAdapter;
 import com.tdtruong.chatapp.Model.ChatList;
 import com.tdtruong.chatapp.Model.User;
-import com.tdtruong.chatapp.Notification.Token;
 import com.tdtruong.chatapp.R;
-
 
 import java.util.ArrayList;
 import java.util.List;
-
-
 public class ChatsFragment extends Fragment {
-
     private RecyclerView recyclerView;
 
     private UserAdapter userAdapter;
@@ -64,26 +58,15 @@ public class ChatsFragment extends Fragment {
                     ChatList chatlist = snapshot.getValue(ChatList.class);
                     usersList.add(chatlist);
                 }
-
                 chatList();
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
 
-        updateToken(FirebaseInstanceId.getInstance().getToken());
-
-
         return view;
-    }
-
-    private void updateToken(String token){
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Tokens");
-        Token token1 = new Token(token);
-        reference.child(fuser.getUid()).setValue(token1);
     }
 
     private void chatList() {

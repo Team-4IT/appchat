@@ -1,6 +1,5 @@
 package com.tdtruong.chatapp;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -64,6 +63,13 @@ public class MainActivity extends AppCompatActivity {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
 
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("ipaddress", ip);
+        reference.updateChildren(hashMap);
+
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -72,15 +78,12 @@ public class MainActivity extends AppCompatActivity {
                 if (user.getImageURL().equals("default")){
                     profile_image.setImageResource(R.drawable.profile_image);
                 } else {
-
-                    //change this
                     Glide.with(getApplicationContext()).load(user.getImageURL()).into(profile_image);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
 
         });
@@ -98,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     Chat chat = snapshot.getValue(Chat.class);
                     assert chat != null;
-                    if (chat.getReceiver().equals(firebaseUser.getUid()) && !chat.isIsseen()){
+                    if (chat.getUid_receiver().equals(firebaseUser.getUid()) && !chat.isIsseen()){
                         unread++;
                     }
                 }
@@ -115,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
                 viewPager.setAdapter(viewPagerAdapter);
 
                 tabLayout.setupWithViewPager(viewPager);
-
             }
 
             @Override
@@ -123,16 +125,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
-
-        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("ipaddress", ip);
-        reference.updateChildren(hashMap);
 
     }
 
@@ -181,8 +173,6 @@ public class MainActivity extends AppCompatActivity {
             fragments.add(fragment);
             titles.add(title);
         }
-
-        // Ctrl + O
 
         @Nullable
         @Override

@@ -7,6 +7,15 @@ public class User {
     private String imageURL;
     private String status;
     private String search;
+    private String ipaddress;
+
+    public String getIpaddress() {
+        return ipaddress;
+    }
+
+    public void setIpaddress(String ipaddress) {
+        this.ipaddress = ipaddress;
+    }
 
     public User(String id, String username, String imageURL, String status, String search) {
         this.id = id;
