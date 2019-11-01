@@ -31,12 +31,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.tdtruong.chatapp.Adapter.MessageAdapter;
 import com.tdtruong.chatapp.Model.Chat;
@@ -57,11 +55,10 @@ public class ChatActivity extends AppCompatActivity {
 
     FirebaseUser fuser;
     DatabaseReference reference;
+    DatabaseReference mReference;
 
     ImageButton btn_send;
     ImageButton btn_file_transfer;
-    ImageButton btn_icon;
-    ImageButton fileImage;
     EditText text_send;
 
     MessageAdapter messageAdapter;
@@ -92,6 +89,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(ChatActivity.this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                finish();
             }
         });
 
@@ -111,12 +109,7 @@ public class ChatActivity extends AppCompatActivity {
         btn_file_transfer = findViewById(R.id.file_transfer_btn);
         btn_file_transfer.setImageResource(R.drawable.ic_action_file_transfer);
 
-        btn_icon = findViewById(R.id.emotion_btn);
-        btn_icon.setImageResource(R.drawable.ic_action_emotion);
-
         text_send = findViewById(R.id.chat_edit_text);
-
-        fileImage = findViewById(R.id.file);
 
         intent = getIntent();
         userid = intent.getStringExtra("userid");
@@ -128,6 +121,7 @@ public class ChatActivity extends AppCompatActivity {
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 final String msg = text_send.getText().toString();
                 if (!msg.equals("")){
                     reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
@@ -140,18 +134,10 @@ public class ChatActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-
                         }});
                 }
-
-                else if(fileImage.isShown()){
-                    Log.e("Run","ok2");
-                    sendMessageHasFile();
-                    fileImage.setVisibility(View.GONE);
-                }
-                else {
+                else
                     Toast.makeText(ChatActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
-                }
 
                 text_send.setText("");
             }
@@ -160,12 +146,6 @@ public class ChatActivity extends AppCompatActivity {
         btn_file_transfer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String mess = text_send.getText().toString();
-                if(!mess.equals(""))
-                    sendMessage(fuser.getUid(), userid, mess);
-                else
-                    Toast.makeText(ChatActivity.this, "Your message is empty!",Toast.LENGTH_SHORT);
-                text_send.setText("");
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 intent.setType("pdf/*");
@@ -180,13 +160,12 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 username.setText(user.getUsername());
-                if (user.getImageURL().equals("default")){
+                if (user.getImageURL().equals("default"))
                     profile_image.setImageResource(R.drawable.profile_image);
-                } else {
+                else
                     Glide.with(getApplicationContext()).load(user.getImageURL()).into(profile_image);
-                }
 
-                readMesagges(fuser.getUid(), userid, user.getImageURL());
+                readMessage(fuser.getUid(), userid, user.getImageURL());
             }
 
             @Override
@@ -220,10 +199,10 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void sendMessage(String ipaddr_sender, final String ipaddr_receiver, String message){
+    private void
+    sendMessage(String ipaddr_sender, final String ipaddr_receiver, String message){
 
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-
 
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("ipaddr_sender", ipaddr_sender);
@@ -262,7 +241,6 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendMessageHasFile(){
-
         final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist1")
                 .child(fuser.getUid())
                 .child(userid);
@@ -277,7 +255,6 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
 
@@ -288,9 +265,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-    private void readMesagges(final String myid, final String userid, final String imageurl){
+    private void readMessage(final String myid, final String userid, final String imageurl){
         mchat = new ArrayList<>();
 
+        Log.i("READ MESSAGE:", "GG");
         reference = FirebaseDatabase.getInstance().getReference("Chat1");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -350,14 +328,13 @@ public class ChatActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 273 && resultCode == RESULT_OK && data.getData()!= null){
+            Log.i("ACTIVITY FILE:", "GG");
             loadingBar.setTitle("Sending File");
             loadingBar.setMessage("Please wait, we are sending that file...");
             loadingBar.setCanceledOnTouchOutside(false);
             loadingBar.show();
-            fileImage.setVisibility(View.VISIBLE);
 
             fileUri = data.getData();
-
 
             StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(("Files"));
             final String messagePushID = fuser.getUid();
@@ -372,17 +349,31 @@ public class ChatActivity extends AppCompatActivity {
                         result.addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                String fileLink = uri.toString();
-                                DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+                                final String fileLink = uri.toString();
+                                final DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+                                mReference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
 
-                                HashMap<String, Object> hashMap = new HashMap<>();
-                                hashMap.put("sender", fuser.getUid());
-                                hashMap.put("receiver", userid);
-                                hashMap.put("message", fileLink);
-                                hashMap.put("type","File");
-                                hashMap.put("isseen", false);
-                                reference.child("Chat1").push().setValue(hashMap);
-                                loadingBar.dismiss();
+                                mReference.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        User user = dataSnapshot.getValue(User.class);
+                                        HashMap<String, Object> hashMap = new HashMap<>();
+                                        hashMap.put("ipaddr_sender", user.getIpaddress());
+                                        hashMap.put("ipaddr_receiver", userIpAddress);
+                                        hashMap.put("uid_sender", fuser.getUid());
+                                        hashMap.put("uid_receiver", userid);
+                                        hashMap.put("message", fileLink);
+                                        hashMap.put("type","File");
+                                        hashMap.put("isseen", false);
+                                        reference.child("Chat1").push().setValue(hashMap);
+                                        loadingBar.dismiss();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
 
                             }
                         });
@@ -402,6 +393,13 @@ public class ChatActivity extends AppCompatActivity {
                     loadingBar.setMessage((int)p + " % Uploading...");
                 }
             });
+            sendMessageHasFile();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+        super.onBackPressed();
     }
 }

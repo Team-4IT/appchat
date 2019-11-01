@@ -1,5 +1,6 @@
 package com.tdtruong.chatapp;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -200,5 +201,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         status("offline");
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        setResult(ChatActivity.RESULT_CANCELED);
     }
 }

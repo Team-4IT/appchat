@@ -72,25 +72,6 @@
             />
 
         <ImageButton
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:id="@+id/emotion_btn"
-            android:layout_toLeftOf="@id/send_btn"
-            android:background="#FFF"
-            android:layout_marginTop="5dp"
-            />
-
-        <ImageButton
-            android:visibility="gone"
-            android:src="@drawable/calendar_picture"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:id="@+id/file"
-            android:layout_toLeftOf="@id/emotion_btn"
-            android:background="#FFF"
-            android:layout_marginTop="5dp"/>
-
-        <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:id="@+id/send_btn"

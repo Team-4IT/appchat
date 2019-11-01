@@ -62,8 +62,8 @@
     </LinearLayout>
 
     <ImageView
-        android:src="@drawable/teddy"
-        android:layout_marginTop="20dp"
+        android:src="@drawable/register"
+        android:layout_marginTop="50dp"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/lnRegisterContent"
         android:layout_width="200dp"

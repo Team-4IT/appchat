@@ -30,8 +30,9 @@
             android:textColor="#FFF"/>
 
         <ImageView
-            android:src="@drawable/teddy"
+            android:src="@drawable/file"
             android:layout_marginTop="10dp"
+            android:visibility="gone"
             android:id="@+id/img_file"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"

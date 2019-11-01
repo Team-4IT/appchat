@@ -56,34 +56,35 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull final MessageAdapter.ViewHolder holder, final int position) {
         Chat chat = mChat.get(position);
-        String messageSenderID = fuser.getUid();
         String messageType = chat.getType();
         holder.chatContent.setText(chat.getMessage());
 
-        if(imageUrl.equals("default"))
+        if (imageUrl.equals("default"))
             holder.profileImage.setImageResource(R.drawable.profile_image);
         else
             Glide.with(mContext).load(imageUrl).into(holder.profileImage);
 
         holder.profileImage.setImageResource(R.drawable.profile_image);
 
-        if(position == mChat.size() - 1) {
+        if (position == mChat.size() - 1) {
             if (chat.isIsseen())
                 holder.seenMessage.setText("Seen");
             else
                 holder.seenMessage.setText("Delivered");
-            }
-        else
+        } else
             holder.seenMessage.setVisibility(View.GONE);
 
-        if(messageType.equals("Text")){
-            holder.fileImage.setVisibility(View.GONE);
-            holder.chatContent.setVisibility(View.VISIBLE);
-        }
+//        if (messageType.equals("Text")) {
+//            holder.fileImage.setVisibility(View.GONE);
+//            holder.chatContent.setVisibility(View.VISIBLE);
+//        }
 
-        if(messageType.equals("File")){
+        if (messageType.equals("File")) {
             holder.fileImage.setVisibility(View.VISIBLE);
             holder.chatContent.setVisibility(View.GONE);
+        } else {
+            holder.fileImage.setVisibility(View.GONE);
+            holder.chatContent.setVisibility(View.VISIBLE);
         }
 
         holder.fileImage.setOnClickListener(new View.OnClickListener() {
@@ -93,8 +94,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 holder.fileImage.getContext().startActivity(intent);
             }
         });
-
-        }
+    }
 
 
     public class ViewHolder extends RecyclerView.ViewHolder{

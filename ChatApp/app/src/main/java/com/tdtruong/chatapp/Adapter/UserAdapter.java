@@ -33,13 +33,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     private Context mContext;
     private List<User> mUsers;
     private boolean ischat;
+    private boolean lastMess;
 
     private String theLastMessage;
 
-    public UserAdapter(Context mContext, List<User> mUsers, boolean ischat){
+    public UserAdapter(Context mContext, List<User> mUsers, boolean ischat, boolean lastMess){
         this.mUsers = mUsers;
         this.mContext = mContext;
         this.ischat = ischat;
+        this.lastMess = lastMess;
     }
 
     @NonNull
@@ -78,6 +80,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             holder.img_on.setVisibility(View.GONE);
             holder.img_off.setVisibility(View.GONE);
         }
+
+        if(lastMess)
+            holder.last_msg.setVisibility(View.VISIBLE);
+        else
+            holder.last_msg.setVisibility(View.GONE);
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
