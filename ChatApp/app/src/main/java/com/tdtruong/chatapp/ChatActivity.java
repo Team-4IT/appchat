@@ -4,8 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -302,10 +304,8 @@ public class ChatActivity extends AppCompatActivity {
 
     private void status(String status){
         reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
-
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("status", status);
-
         reference.updateChildren(hashMap);
     }
 
@@ -349,32 +349,20 @@ public class ChatActivity extends AppCompatActivity {
                         result.addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                final String fileLink = uri.toString();
-                                final DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-                                mReference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
-
-                                mReference.addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        User user = dataSnapshot.getValue(User.class);
-                                        HashMap<String, Object> hashMap = new HashMap<>();
-                                        hashMap.put("ipaddr_sender", user.getIpaddress());
-                                        hashMap.put("ipaddr_receiver", userIpAddress);
-                                        hashMap.put("uid_sender", fuser.getUid());
-                                        hashMap.put("uid_receiver", userid);
-                                        hashMap.put("message", fileLink);
-                                        hashMap.put("type","File");
-                                        hashMap.put("isseen", false);
-                                        reference.child("Chat1").push().setValue(hashMap);
-                                        loadingBar.dismiss();
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                    }
-                                });
-
+                                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                                String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                                String fileLink = uri.toString();
+                                DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+                                HashMap<String, Object> hashMap = new HashMap<>();
+                                hashMap.put("ipaddr_sender", ip);
+                                hashMap.put("ipaddr_receiver", userIpAddress);
+                                hashMap.put("uid_sender", fuser.getUid());
+                                hashMap.put("uid_receiver", userid);
+                                hashMap.put("message", fileLink);
+                                hashMap.put("type","File");
+                                hashMap.put("isseen", false);
+                                reference.child("Chat1").push().setValue(hashMap);
+                                loadingBar.dismiss();
                             }
                         });
                     }
@@ -395,11 +383,5 @@ public class ChatActivity extends AppCompatActivity {
             });
             sendMessageHasFile();
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        finish();
-        super.onBackPressed();
     }
 }
