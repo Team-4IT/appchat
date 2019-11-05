@@ -99,7 +99,6 @@ public class ChatActivity extends AppCompatActivity {
         RootRef = FirebaseDatabase.getInstance().getReference();
 
         messageReceiverID = getIntent().getExtras().get("userid").toString();
-        messageReceiverName = getIntent().getExtras().get("visit_user_name").toString();
         messageReceiverImage = getIntent().getExtras().get("userimageurl").toString();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
