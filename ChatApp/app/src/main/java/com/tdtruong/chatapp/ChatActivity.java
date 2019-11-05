@@ -1,5 +1,6 @@
 package com.tdtruong.chatapp;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -148,6 +149,9 @@ public class ChatActivity extends AppCompatActivity {
         btn_file_transfer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
+
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 intent.setType("pdf/*");

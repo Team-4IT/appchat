@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tool:context=".ChatActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolbar"
+        android:background="#FFF">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Groupname"
+            android:id="@+id/groupname"
+            android:textSize="18sp"
+            android:layout_marginLeft="25dp"
+            android:textColor="#000"
+            android:layout_marginStart="25dp"
+            android:textStyle="bold"
+            />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/recycler_chat"
+        android:layout_below="@id/toolbar"
+        android:layout_above="@id/bottom_chat"
+        >
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFF"
+        android:layout_alignParentBottom="true"
+        android:padding="5dp"
+        android:id="@+id/bottom_chat">
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:id="@+id/file_transfer_btn"
+            android:background="#FFF"
+            />
+
+        <EditText
+            android:id="@+id/chat_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/file_transfer_btn"
+            android:layout_toLeftOf="@id/send_btn"
+            android:hint="Type a message..."
+            android:layout_centerVertical="true"
+            android:background="@android:color/transparent"
+            />
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/send_btn"
+            android:layout_alignParentRight="true"
+            android:background="#FFF"
+            />
+
+    </RelativeLayout>
+
+</RelativeLayout>

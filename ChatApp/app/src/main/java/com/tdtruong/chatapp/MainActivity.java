@@ -1,15 +1,20 @@
 package com.tdtruong.chatapp;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
+import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +26,8 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,6 +37,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tdtruong.chatapp.Fragment.ChatsFragment;
+import com.tdtruong.chatapp.Fragment.GroupChatFragment;
 import com.tdtruong.chatapp.Fragment.ProfileFragment;
 import com.tdtruong.chatapp.Fragment.UsersFragment;
 import com.tdtruong.chatapp.Model.Chat;
@@ -47,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     public TextView username;
 
     FirebaseUser firebaseUser;
-    DatabaseReference reference;
+    DatabaseReference reference, rootref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
+        rootref = FirebaseDatabase.getInstance().getReference();
 
         WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
@@ -113,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                     viewPagerAdapter.addFragment(new ChatsFragment(), "("+unread+") Chats");
                 }
 
+                viewPagerAdapter.addFragment(new GroupChatFragment(), "Groups");
                 viewPagerAdapter.addFragment(new UsersFragment(), "Users");
                 viewPagerAdapter.addFragment(new ProfileFragment(), "Profile");
 
@@ -144,9 +154,56 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                 finish();
                 return true;
+            case R.id.create_group:
+                newGroup();
+                return true;
         }
 
         return false;
+    }
+
+    private void newGroup() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this, R.style.AlertDialog);
+        builder.setTitle("Enter Group Name:");
+        final EditText mGroupName = new EditText(MainActivity.this);
+        mGroupName.setHint("e.g Computer Networking");
+
+        builder.setView(mGroupName);
+        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String groupName = mGroupName.getText().toString();
+
+                if (TextUtils.isEmpty(groupName)) {
+                    Toast.makeText(MainActivity.this, "Please write the group name !", Toast.LENGTH_SHORT);
+                } else {
+                    createNewGroup(groupName);
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void createNewGroup(final String groupname) {
+        rootref.child("Groups").child(groupname).setValue("")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        if (task.isSuccessful())
+                        {
+                            Toast.makeText(MainActivity.this, groupname + " Group Is Created Successfully...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
