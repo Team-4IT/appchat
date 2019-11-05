@@ -215,9 +215,9 @@ public class ChatActivity extends AppCompatActivity {
         hashMap.put("type","Text");
         hashMap.put("isseen", false);
 
-        reference.child("Chat1").push().setValue(hashMap);
+        reference.child("Chats").push().setValue(hashMap);
 
-        final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist1")
+        final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("ChatList")
                 .child(fuser.getUid())
                 .child(userid);
 
@@ -235,7 +235,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("Chatlist1")
+        final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("ChatList")
                 .child(userid)
                 .child(fuser.getUid());
         chatRefReceiver.child("id").setValue(fuser.getUid());
@@ -243,7 +243,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendMessageHasFile(){
-        final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist1")
+        final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("ChatList")
                 .child(fuser.getUid())
                 .child(userid);
 
@@ -260,7 +260,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("Chatlist1")
+        final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("ChatList")
                 .child(userid)
                 .child(fuser.getUid());
         chatRefReceiver.child("id").setValue(fuser.getUid());
@@ -271,7 +271,7 @@ public class ChatActivity extends AppCompatActivity {
         mchat = new ArrayList<>();
 
         Log.i("READ MESSAGE:", "GG");
-        reference = FirebaseDatabase.getInstance().getReference("Chat1");
+        reference = FirebaseDatabase.getInstance().getReference("Chats");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -328,7 +328,6 @@ public class ChatActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 273 && resultCode == RESULT_OK && data.getData()!= null){
-            Log.i("ACTIVITY FILE:", "GG");
             loadingBar.setTitle("Sending File");
             loadingBar.setMessage("Please wait, we are sending that file...");
             loadingBar.setCanceledOnTouchOutside(false);
@@ -361,7 +360,7 @@ public class ChatActivity extends AppCompatActivity {
                                 hashMap.put("message", fileLink);
                                 hashMap.put("type","File");
                                 hashMap.put("isseen", false);
-                                reference.child("Chat1").push().setValue(hashMap);
+                                reference.child("Chats").push().setValue(hashMap);
                                 loadingBar.dismiss();
                             }
                         });
