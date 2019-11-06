@@ -1,6 +1,8 @@
 package com.tdtruong.chatapp;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -23,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,6 +40,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.tdtruong.chatapp.Adapter.MessageAdapter;
 import com.tdtruong.chatapp.Model.Chat;
@@ -46,6 +50,7 @@ import com.tdtruong.chatapp.Model.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -78,10 +83,20 @@ public class ChatActivity extends AppCompatActivity {
     private Uri fileUri;
     private ProgressDialog loadingBar;
 
+    private String checker="",myurl="";
+
+    private FirebaseAuth mAuth;
+    private DatabaseReference RootRef;
+    private StorageTask uploadTask;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+
+        mAuth = FirebaseAuth.getInstance();
+        RootRef = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -148,10 +163,46 @@ public class ChatActivity extends AppCompatActivity {
         btn_file_transfer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                intent.setType("pdf/*");
-                startActivityForResult(intent.createChooser(intent,"Send File"), 273);
+
+
+
+                CharSequence options[]=new CharSequence[]{
+                        "image",
+                        "PDF Files",
+                        "WORD Files"
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
+
+                builder.setTitle("Select the File");
+                builder.setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if(i==0){
+                            checker="image";
+                            Intent intent=new Intent();
+                            intent.setAction(Intent.ACTION_GET_CONTENT);
+                            intent.setType("image/*");
+                            startActivityForResult(intent.createChooser(intent,"select image"), 438);
+
+                        }
+                        if(i==1){
+                            checker="pfd";
+                            Intent intent = new Intent();
+                            intent.setAction(Intent.ACTION_GET_CONTENT);
+                            intent.setType("pdf/*");
+                            startActivityForResult(intent.createChooser(intent,"Send File"), 273);
+                        }
+                        if(i==2){
+                            checker="docx";
+                        }
+                    }
+                });
+
+
+
+
+
             }
         });
 
@@ -327,6 +378,80 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 438 && resultCode == RESULT_OK && data.getData()!= null&&data!=null){
+
+
+            loadingBar.setTitle("Sending File");
+            loadingBar.setMessage("Please wait, we are sending that file...");
+            loadingBar.setCanceledOnTouchOutside(false);
+            loadingBar.show();
+
+
+            fileUri=data.getData();
+            if(!checker.equals("image")){
+
+            }
+            else  if(checker.equals("image")){
+                StorageReference storageReference= FirebaseStorage.getInstance().getReference().child("Image File");
+
+                String messageSenderRef = "Messages/" + fuser.getUid() + "/" + userid;
+                String messageReceiverRef = "Messages/" + userid + "/" + fuser.getUid();
+
+                DatabaseReference userMessageKeyRef = RootRef.child("Messages")
+                        .child(fuser.getUid()).child(userid).push();
+
+                String messagePushID = userMessageKeyRef.getKey();
+
+                final StorageReference filePath =storageReference.child(messagePushID+"."+"jpg");
+
+                uploadTask= filePath.putFile(fileUri);
+                uploadTask.continueWithTask(new Continuation() {
+                    @Override
+                    public Object then(@NonNull Task task) throws Exception {
+                     if (!task.isSuccessful()){
+                         throw task.getException();
+                     }
+
+                        return filePath.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()){
+                            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                            String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                            Uri dowloadUrl=task.getResult();
+                            myurl=dowloadUrl.toString();
+
+                                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+                                    HashMap<String, Object> hashMap = new HashMap<>();
+                                    hashMap.put("ipaddr_sender", ip);
+                                    hashMap.put("ipaddr_receiver", userIpAddress);
+                                    hashMap.put("uid_sender", fuser.getUid());
+                                    hashMap.put("uid_receiver", userid);
+                                    hashMap.put("message", myurl);
+                                    hashMap.put("type",checker);
+                                    hashMap.put("isseen", false);
+                                    reference.child("Chats").push().setValue(hashMap);
+                                    loadingBar.dismiss();
+
+                        }
+                    }
+                });
+
+            }
+            else{
+                Toast.makeText(this,"Nothing select,Error!",Toast.LENGTH_SHORT).show();
+            }
+
+
+        }
+
+
+
+
+
+
         if(requestCode == 273 && resultCode == RESULT_OK && data.getData()!= null){
             loadingBar.setTitle("Sending File");
             loadingBar.setMessage("Please wait, we are sending that file...");
