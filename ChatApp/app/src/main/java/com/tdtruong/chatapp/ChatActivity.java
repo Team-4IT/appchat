@@ -2,13 +2,20 @@ package com.tdtruong.chatapp;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
@@ -163,13 +170,9 @@ public class ChatActivity extends AppCompatActivity {
         btn_file_transfer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-
                 CharSequence options[]=new CharSequence[]{
-                        "image",
-                        "PDF Files",
-                        "WORD Files"
+                        "Image",
+                        "Files",
                 };
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
@@ -179,30 +182,25 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if(i==0){
-                            checker="image";
+                            checker="Image";
                             Intent intent=new Intent();
                             intent.setAction(Intent.ACTION_GET_CONTENT);
                             intent.setType("image/*");
-                            startActivityForResult(intent.createChooser(intent,"select image"), 438);
+                            startActivityForResult(intent.createChooser(intent,"select image"), 99);
 
                         }
                         if(i==1){
                             checker="pfd";
                             Intent intent = new Intent();
                             intent.setAction(Intent.ACTION_GET_CONTENT);
-                            intent.setType("pdf/*");
+                            intent.setType("*/*");
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
                             startActivityForResult(intent.createChooser(intent,"Send File"), 273);
-                        }
-                        if(i==2){
-                            checker="docx";
                         }
                     }
                 });
 
-
-
-
-
+                builder.show();
             }
         });
 
@@ -378,7 +376,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 438 && resultCode == RESULT_OK && data.getData()!= null&&data!=null){
+        if(requestCode == 99 && resultCode == RESULT_OK && data.getData()!= null&&data!=null){
 
 
             loadingBar.setTitle("Sending File");
@@ -388,21 +386,18 @@ public class ChatActivity extends AppCompatActivity {
 
 
             fileUri=data.getData();
-            if(!checker.equals("image")){
+            if(!checker.equals("Image")){
 
             }
-            else  if(checker.equals("image")){
+            else if(checker.equals("Image")){
                 StorageReference storageReference= FirebaseStorage.getInstance().getReference().child("Image File");
 
-                String messageSenderRef = "Messages/" + fuser.getUid() + "/" + userid;
-                String messageReceiverRef = "Messages/" + userid + "/" + fuser.getUid();
-
-                DatabaseReference userMessageKeyRef = RootRef.child("Messages")
+                DatabaseReference userMessageKeyRef = RootRef.child("Chats")
                         .child(fuser.getUid()).child(userid).push();
 
                 String messagePushID = userMessageKeyRef.getKey();
 
-                final StorageReference filePath =storageReference.child(messagePushID+"."+"jpg");
+                final StorageReference filePath =storageReference.child(messagePushID + "."+"jpg");
 
                 uploadTask= filePath.putFile(fileUri);
                 uploadTask.continueWithTask(new Continuation() {
@@ -443,14 +438,7 @@ public class ChatActivity extends AppCompatActivity {
             else{
                 Toast.makeText(this,"Nothing select,Error!",Toast.LENGTH_SHORT).show();
             }
-
-
         }
-
-
-
-
-
 
         if(requestCode == 273 && resultCode == RESULT_OK && data.getData()!= null){
             loadingBar.setTitle("Sending File");

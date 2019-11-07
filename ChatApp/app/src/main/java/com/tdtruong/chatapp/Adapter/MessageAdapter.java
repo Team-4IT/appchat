@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.squareup.picasso.Picasso;
 import com.tdtruong.chatapp.Model.Chat;
 import com.tdtruong.chatapp.Model.User;
 import com.tdtruong.chatapp.R;
@@ -74,17 +75,21 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         } else
             holder.seenMessage.setVisibility(View.GONE);
 
-//        if (messageType.equals("Text")) {
-//            holder.fileImage.setVisibility(View.GONE);
-//            holder.chatContent.setVisibility(View.VISIBLE);
-//        }
-
         if (messageType.equals("File")) {
             holder.fileImage.setVisibility(View.VISIBLE);
             holder.chatContent.setVisibility(View.GONE);
-        } else {
+            holder.imageChat.setVisibility(View.GONE);
+        }
+        else if(messageType.equals("Text")){
             holder.fileImage.setVisibility(View.GONE);
             holder.chatContent.setVisibility(View.VISIBLE);
+            holder.imageChat.setVisibility(View.GONE);
+        }
+        else{
+            holder.imageChat.setVisibility(View.VISIBLE);
+            holder.chatContent.setVisibility(View.GONE);
+            holder.fileImage.setVisibility(View.GONE);
+            Picasso.get().load(chat.getMessage()).into(holder.imageChat);
         }
 
         holder.fileImage.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +105,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder{
 
         public TextView chatContent;
-        public ImageView profileImage,fileImage;
+        public ImageView profileImage,fileImage, imageChat;
         public TextView seenMessage;
 
 
@@ -110,6 +115,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             profileImage = view.findViewById(R.id.profile_image);
             seenMessage = view.findViewById(R.id.seen_message);
             fileImage = view.findViewById(R.id.img_file);
+            imageChat = view.findViewById(R.id.image_chat);
         }
     }
 

@@ -13,17 +13,17 @@
         android:background="#FFF">
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Groupname"
-            android:id="@+id/groupname"
-            android:textSize="18sp"
-            android:layout_marginLeft="25dp"
-            android:textColor="#000"
-            android:layout_marginStart="25dp"
-            android:textStyle="bold"
-            />
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Groupname"-->
+<!--            android:id="@+id/groupname"-->
+<!--            android:textSize="18sp"-->
+<!--            android:layout_marginLeft="25dp"-->
+<!--            android:textColor="#000"-->
+<!--            android:layout_marginStart="25dp"-->
+<!--            android:textStyle="bold"-->
+<!--            />-->
 
     </androidx.appcompat.widget.Toolbar>
 
