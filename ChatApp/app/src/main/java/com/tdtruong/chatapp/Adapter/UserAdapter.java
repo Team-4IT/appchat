@@ -3,6 +3,7 @@ package com.tdtruong.chatapp.Adapter;
 import android.content.Context;
 import android.content.Intent;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +11,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -137,6 +140,17 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                         if (chat.getUid_receiver().equals(firebaseUser.getUid()) && chat.getUid_sender().equals(userid) ||
                                 chat.getUid_receiver().equals(userid) && chat.getUid_sender().equals(firebaseUser.getUid())) {
                             theLastMessage = chat.getMessage();
+                            String user_sender = chat.getUid_sender();
+                            String user_receiver = chat.getUid_receiver();
+                            if(theLastMessage.startsWith("https://firebasestorage")){
+                                if(user_sender.equals(userid)){
+                                    theLastMessage = "You received a file";
+                                }
+                                else if(user_receiver.equals(userid)){
+                                    theLastMessage = "You sent a file";
+                                }
+                            }
+
                         }
                     }
                 }

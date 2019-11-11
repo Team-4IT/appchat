@@ -430,6 +430,29 @@ public class ChatActivity extends AppCompatActivity {
                                     reference.child("Chats").push().setValue(hashMap);
                                     loadingBar.dismiss();
 
+                            final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("ChatList")
+                                    .child(fuser.getUid())
+                                    .child(userid);
+
+                            chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    if (!dataSnapshot.exists()){
+                                        chatRef.child("id").setValue(userid);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+
+                            final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("ChatList")
+                                    .child(userid)
+                                    .child(fuser.getUid());
+                            chatRefReceiver.child("id").setValue(fuser.getUid());
+
                         }
                     }
                 });
@@ -475,6 +498,29 @@ public class ChatActivity extends AppCompatActivity {
                                 hashMap.put("isseen", false);
                                 reference.child("Chats").push().setValue(hashMap);
                                 loadingBar.dismiss();
+
+                                final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("ChatList")
+                                        .child(fuser.getUid())
+                                        .child(userid);
+
+                                chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        if (!dataSnapshot.exists()){
+                                            chatRef.child("id").setValue(userid);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+
+                                final DatabaseReference chatRefReceiver = FirebaseDatabase.getInstance().getReference("ChatList")
+                                        .child(userid)
+                                        .child(fuser.getUid());
+                                chatRefReceiver.child("id").setValue(fuser.getUid());
                             }
                         });
                     }

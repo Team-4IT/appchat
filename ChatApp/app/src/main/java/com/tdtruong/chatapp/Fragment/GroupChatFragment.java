@@ -17,7 +17,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.tdtruong.chatapp.Model.GroupChatActivity;
+import com.tdtruong.chatapp.GroupChatActivity;
 import com.tdtruong.chatapp.R;
 
 import java.util.ArrayList;

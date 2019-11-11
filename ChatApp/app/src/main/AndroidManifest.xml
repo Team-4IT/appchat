@@ -16,6 +16,7 @@
         android:theme="@style/Theme.Design.Light.NoActionBar">
         <activity android:name=".MainActivity"/>
 
+        <activity android:name=".GroupChatActivity"/>
         <activity android:name=".ChatActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

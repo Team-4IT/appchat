@@ -84,6 +84,8 @@ public class GroupChatActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        intent = getIntent();
+        groupName = intent.getStringExtra("groupName");
         getSupportActionBar().setTitle(groupName);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -109,8 +111,8 @@ public class GroupChatActivity extends AppCompatActivity {
 
         text_send = findViewById(R.id.chat_edit_text);
 
-        intent = getIntent();
-        groupName = intent.getStringExtra("groupName");
+//        intent = getIntent();
+//        groupName = intent.getStringExtra("groupName");
 
         fuser = FirebaseAuth.getInstance().getCurrentUser();
 
