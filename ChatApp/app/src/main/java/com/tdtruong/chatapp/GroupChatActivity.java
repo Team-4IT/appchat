@@ -41,6 +41,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.tdtruong.chatapp.Adapter.MessageAdapter;
 import com.tdtruong.chatapp.Model.Chat;
+import com.tdtruong.chatapp.Model.GroupChat;
 import com.tdtruong.chatapp.Model.User;
 
 
@@ -52,9 +53,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class GroupChatActivity extends AppCompatActivity {
-
-    CircleImageView profile_image;
-    TextView username;
 
     FirebaseUser fuser;
     DatabaseReference reference;
@@ -70,12 +68,8 @@ public class GroupChatActivity extends AppCompatActivity {
 
     Intent intent;
 
-    ValueEventListener seenListener;
 
-    String groupName;
-
-    private Uri fileUri;
-    private ProgressDialog loadingBar;
+    String groupName, currentUserName, imageURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +90,6 @@ public class GroupChatActivity extends AppCompatActivity {
             }
         });
 
-
         recyclerView = findViewById(R.id.recycler_chat);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -111,12 +104,12 @@ public class GroupChatActivity extends AppCompatActivity {
 
         text_send = findViewById(R.id.chat_edit_text);
 
-//        intent = getIntent();
-//        groupName = intent.getStringExtra("groupName");
+        intent = getIntent();
+        groupName = intent.getStringExtra("groupName");
+        currentUserName = intent.getStringExtra("currentUserName");
+        imageURL = intent.getStringExtra("imageURL");
 
         fuser = FirebaseAuth.getInstance().getCurrentUser();
-
-        loadingBar = new ProgressDialog(this);
 
         btn_send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,17 +117,9 @@ public class GroupChatActivity extends AppCompatActivity {
 
                 final String msg = text_send.getText().toString();
                 if (!msg.equals("")){
-                    reference = FirebaseDatabase.getInstance().getReference("Users").child(fuser.getUid());
-                    reference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            User user = dataSnapshot.getValue(User.class);
-//                            sendMessage(user.getIpaddress(), groupName, msg);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                        }});
+                    WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                    String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                    sendMessage(ip, groupName, msg);
                 }
                 else
                     Toast.makeText(GroupChatActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
@@ -154,65 +139,14 @@ public class GroupChatActivity extends AppCompatActivity {
             }
         });
 
-//        seenMessage(groupName);
-    }
+        readMessage(groupName);
 
-//    private void seenMessage(final String userid){
-//        reference = FirebaseDatabase.getInstance().getReference("Chats");
-//        seenListener = reference.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-//                    Chat chat = snapshot.getValue(Chat.class);
-//                    if (chat.getUid_receiver().equals(fuser.getUid()) && chat.getUid_sender().equals(userid)){
-//                        HashMap<String, Object> hashMap = new HashMap<>();
-//                        hashMap.put("isseen", true);
-//                        snapshot.getRef().updateChildren(hashMap);
-//                    }
-//                }
-//            }
+//        reference = FirebaseDatabase.getInstance().getReference("Groups").child(groupName);
 //
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
-//    }
-//
-//    private void
-//    sendMessage(String ipaddr_sender, final String groupName, String message){
-//
-//        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Groups").child(groupName);
-//
-//        HashMap<String, Object> hashMap = new HashMap<>();
-//        hashMap.put("ipaddr_sender", ipaddr_sender);
-//        hashMap.put("message", message);
-//        hashMap.put("type","Text");
-//        hashMap.put("isseen", false);
-//
-//        reference.child(fuser.getUid()).push().setValue(hashMap);
-//
-//    }
-//
-//
-//    private void readMessage(final String myid, final String userid, final String imageurl){
-//        mchat = new ArrayList<>();
-//
-//        reference = FirebaseDatabase.getInstance().getReference("Chats");
 //        reference.addValueEventListener(new ValueEventListener() {
 //            @Override
 //            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                mchat.clear();
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-//                    Chat chat = snapshot.getValue(Chat.class);
-//                    if (chat.getUid_receiver().equals(myid) && chat.getUid_sender().equals(userid) ||
-//                            chat.getUid_receiver().equals(userid) && chat.getUid_sender().equals(myid)){
-//                        mchat.add(chat);
-//                    }
-//
-//                    messageAdapter = new MessageAdapter(GroupChatActivity.this, mchat, imageurl);
-//                    recyclerView.setAdapter(messageAdapter);
-//                }
+//                readMessage(groupName);
 //            }
 //
 //            @Override
@@ -220,62 +154,48 @@ public class GroupChatActivity extends AppCompatActivity {
 //
 //            }
 //        });
-//    }
-//
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if(requestCode == 273 && resultCode == RESULT_OK && data.getData()!= null){
-//            loadingBar.setTitle("Sending File");
-//            loadingBar.setMessage("Please wait, we are sending that file...");
-//            loadingBar.setCanceledOnTouchOutside(false);
-//            loadingBar.show();
-//
-//            fileUri = data.getData();
-//
-//            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(("Files"));
-//            final String messagePushID = fuser.getUid();
-//            final StorageReference filePath = storageReference.child(messagePushID+"."+data.getType());
-//
-//            filePath.putFile(fileUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-//                @Override
-//                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-//                    if(task.isSuccessful()){
-//
-//                        Task<Uri> result = task.getResult().getMetadata().getReference().getDownloadUrl();
-//                        result.addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                            @Override
-//                            public void onSuccess(Uri uri) {
-//                                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-//                                String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-//                                String fileLink = uri.toString();
-//                                DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-//                                HashMap<String, Object> hashMap = new HashMap<>();
-//                                hashMap.put("ipaddr_sender", ip);
-//                                hashMap.put("message", fileLink);
-//                                hashMap.put("type","File");
-//                                hashMap.put("isseen", false);
-//                                reference.child("Groups").child(groupName).child(fuser.getUid()).push().setValue(hashMap);
-//                                loadingBar.dismiss();
-//                            }
-//                        });
-//                    }
-//                }
-//            }).addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception e) {
-//                    loadingBar.dismiss();
-//                    Toast.makeText(GroupChatActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-//
-//                }
-//            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-//                @Override
-//                public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
-//                    double p =(100.0*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
-//                    loadingBar.setMessage((int)p + " % Uploading...");
-//                }
-//            });
-//        }
-//    }
+    }
+
+
+    private void sendMessage(String ipaddr_sender, final String groupName, String message){
+
+        reference = FirebaseDatabase.getInstance().getReference("Groups").child(groupName);
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("uid_sender", fuser.getUid());
+        hashMap.put("ipaddr_sender", ipaddr_sender);
+        hashMap.put("user_name", currentUserName);
+        hashMap.put("message", message);
+        hashMap.put("type","Text");
+        hashMap.put("imageURL",imageURL);
+
+        reference.push().setValue(hashMap);
+    }
+
+    private void readMessage(final String groupname){
+        mchat = new ArrayList<>();
+
+        reference = FirebaseDatabase.getInstance().getReference("Groups").child(groupname);
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mchat.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+//                    GroupChat groupChat = snapshot.getValue(GroupChat.class);
+//                    mchat.add(groupChat);
+                    Chat chat = snapshot.getValue(Chat.class);
+                    User user = snapshot.getValue(User.class);
+                    mchat.add(chat);
+                    Log.e("user_value",user.getUsername());
+                    messageAdapter = new MessageAdapter(GroupChatActivity.this, mchat, user.getImageURL());
+                    recyclerView.setAdapter(messageAdapter);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 }

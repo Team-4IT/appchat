@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 import com.tdtruong.chatapp.Model.Chat;
+import com.tdtruong.chatapp.Model.GroupChat;
 import com.tdtruong.chatapp.Model.User;
 import com.tdtruong.chatapp.R;
 
@@ -26,6 +27,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     private Context mContext;
     private List<Chat> mChat;
+    private List<GroupChat> mGroupChats;
     private String imageUrl;
 
     private FirebaseUser fuser;
@@ -39,6 +41,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         mChat = chat;
         this.imageUrl = imageUrl;
     }
+
 
     @NonNull
     @Override
@@ -65,7 +68,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         else
             Glide.with(mContext).load(imageUrl).into(holder.profileImage);
 
-        holder.profileImage.setImageResource(R.drawable.profile_image);
+//        holder.profileImage.setImageResource(R.drawable.profile_image);
 
         if (position == mChat.size() - 1) {
             if (chat.isIsseen())
