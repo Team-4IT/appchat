@@ -27,8 +27,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     private Context mContext;
     private List<Chat> mChat;
+    private List<String> mImageURL;
     private List<GroupChat> mGroupChats;
-    private String imageUrl;
 
     private FirebaseUser fuser;
 
@@ -36,10 +36,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public static final int MESS_LEFT = 0;
     public static final int MESS_RIGHT = 1;
 
-    public MessageAdapter(Context context, List<Chat> chat, String imageUrl) {
+    public MessageAdapter(Context context, List<Chat> chat, List<String> imageUrl) {
         mContext = context;
         mChat = chat;
-        this.imageUrl = imageUrl;
+        mImageURL = imageUrl;
     }
 
 
@@ -60,6 +60,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull final MessageAdapter.ViewHolder holder, final int position) {
         Chat chat = mChat.get(position);
+        String imageUrl = mImageURL.get(position);
+
         String messageType = chat.getType();
         holder.chatContent.setText(chat.getMessage());
 

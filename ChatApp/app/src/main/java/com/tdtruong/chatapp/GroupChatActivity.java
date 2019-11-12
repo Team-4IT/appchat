@@ -61,8 +61,9 @@ public class GroupChatActivity extends AppCompatActivity {
     ImageButton btn_file_transfer;
     EditText text_send;
 
-    MessageAdapter messageAdapter;
+    MessageAdapter messageAdapter, listMessageAdapter;
     List<Chat> mchat;
+    List<String> mimageURL;
 
     RecyclerView recyclerView;
 
@@ -174,6 +175,7 @@ public class GroupChatActivity extends AppCompatActivity {
 
     private void readMessage(final String groupname){
         mchat = new ArrayList<>();
+        mimageURL = new ArrayList<>();
 
         reference = FirebaseDatabase.getInstance().getReference("Groups").child(groupname);
         reference.addValueEventListener(new ValueEventListener() {
@@ -185,9 +187,11 @@ public class GroupChatActivity extends AppCompatActivity {
 //                    mchat.add(groupChat);
                     Chat chat = snapshot.getValue(Chat.class);
                     User user = snapshot.getValue(User.class);
+
+                    mimageURL.add(user.getImageURL());
                     mchat.add(chat);
-                    Log.e("user_value",user.getUsername());
-                    messageAdapter = new MessageAdapter(GroupChatActivity.this, mchat, user.getImageURL());
+                    messageAdapter = new MessageAdapter(GroupChatActivity.this, mchat, mimageURL);
+
                     recyclerView.setAdapter(messageAdapter);
                 }
             }

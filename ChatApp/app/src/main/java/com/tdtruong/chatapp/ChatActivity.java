@@ -77,6 +77,7 @@ public class ChatActivity extends AppCompatActivity {
 
     MessageAdapter messageAdapter;
     List<Chat> mchat;
+    List<String> mimageURL;
 
     RecyclerView recyclerView;
 
@@ -250,8 +251,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void
-    sendMessage(String ipaddr_sender, final String ipaddr_receiver, String message){
+    private void sendMessage(String ipaddr_sender, final String ipaddr_receiver, String message){
 
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
 
@@ -318,6 +318,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void readMessage(final String myid, final String userid, final String imageurl){
         mchat = new ArrayList<>();
+        mimageURL = new ArrayList<>();
 
         Log.i("READ MESSAGE:", "GG");
         reference = FirebaseDatabase.getInstance().getReference("Chats");
@@ -330,9 +331,10 @@ public class ChatActivity extends AppCompatActivity {
                     if (chat.getUid_receiver().equals(myid) && chat.getUid_sender().equals(userid) ||
                             chat.getUid_receiver().equals(userid) && chat.getUid_sender().equals(myid)){
                         mchat.add(chat);
+                        mimageURL.add(imageurl);
                     }
 
-                    messageAdapter = new MessageAdapter(ChatActivity.this, mchat, imageurl);
+                    messageAdapter = new MessageAdapter(ChatActivity.this, mchat,mimageURL);
                     recyclerView.setAdapter(messageAdapter);
                 }
             }
